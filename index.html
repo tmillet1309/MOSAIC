@@ -2,21 +2,29 @@
 <html lang="en">
 <head>
   <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width,initial-scale=1"/>
-  <title>Mosaic Playground (UMD)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"/>
+  <title>Mosaic — mobile+desktop single file</title>
   <link href="https://fonts.googleapis.com/css2?family=VT323&display=swap" rel="stylesheet">
   <style>
-    html,body{margin:0;height:100%;background:#000}*{box-sizing:border-box}
-    #root{width:100vw;height:100vh;position:relative;overflow:hidden}
+    html,body{margin:0;height:100%}
+    body{background:#000}
+    *{box-sizing:border-box}
+    #root{width:100vw;height:100svh;position:relative;overflow:hidden;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
     .toast{position:absolute;top:12px;left:12px;padding:6px 8px;border-radius:6px;background:rgba(24,24,28,.9);border:1px solid #2a2a33;color:#e7e7ee;font:12px/1.2 system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif}
     .gb{position:absolute;left:50%;transform:translateX(-50%);bottom:18px;min-width:280px;max-width:90vw;background:#f2efe6;color:#111;padding:10px 12px;font-family:VT323,monospace;font-size:22px;box-shadow:0 0 0 3px #000,0 0 0 6px #fff,0 0 0 9px #000}
     .in{background:#fff;border:2px solid #000;padding:4px 6px;font:inherit;font-size:22px;min-width:180px}
-    .btn{margin-left:8px;background:#fff;border:2px solid #000;padding:4px 10px;font:inherit;font-size:22px;cursor:pointer}
+    .btn{margin:6px 6px 0 0;background:#fff;border:2px solid #000;padding:4px 10px;font:inherit;font-size:20px;cursor:pointer}
     .tv{transform-origin:50% 50%;position:absolute;overflow:hidden}
-    .open{animation:tvOpen .22s ease-out forwards}.close{animation:tvClose .22s ease-in forwards}
-    .anim{background:#000}.anim .inner{opacity:0}.ready{background:#f2efe6}.ready .inner{opacity:1;transition:opacity .12s ease .1s}
-    .snow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .06s linear}.anim .snow{opacity:1}
-    .layer{position:absolute;inset:-10%}.noise{filter:url(#crtNoise) contrast(260%) brightness(115%);opacity:.95;animation:jitter .05s steps(2) infinite,wave 1.2s ease-in-out infinite alternate}
+    .open{animation:tvOpen .22s ease-out forwards}
+    .close{animation:tvClose .22s ease-in forwards}
+    .anim{background:#000}
+    .anim .inner{opacity:0}
+    .ready{background:#f2efe6}
+    .ready .inner{opacity:1;transition:opacity .12s ease .1s}
+    .snow{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .06s linear}
+    .anim .snow{opacity:1}
+    .layer{position:absolute;inset:-10%}
+    .noise{filter:url(#crtNoise) contrast(260%) brightness(115%);opacity:.95;animation:jitter .05s steps(2) infinite,wave 1.2s ease-in-out infinite alternate}
     .scan{background:repeating-linear-gradient(0deg,rgba(255,255,255,.05)0 1px,rgba(0,0,0,.1)1px 2px);mix-blend-mode:multiply;opacity:.55;animation:scanShift 1.3s linear infinite}
     .vig{background:radial-gradient(ellipse at 50% 50%,rgba(0,0,0,0)55%,rgba(0,0,0,.35)100%)}
     @keyframes jitter{0%{transform:translateY(-1%) translateX(0)}50%{transform:translateY(1%) translateX(.6%)}100%{transform:translateY(-1%) translateX(0)}}
@@ -28,24 +36,21 @@
 </head>
 <body>
   <div id="root"></div>
-
-  <!-- UMD bundles (no modules) -->
   <script src="https://unpkg.com/preact@10.20.1/dist/preact.umd.js"></script>
   <script src="https://unpkg.com/preact@10.20.1/hooks/dist/hooks.umd.js"></script>
   <script src="https://unpkg.com/htm@3.1.1/dist/htm.umd.js"></script>
-
   <script>
   (function(){
-    const {h, render} = preact;
-    const {useState, useEffect, useMemo, useRef} = preactHooks;
-    const html = htm.bind(h);
+    const {h, render} = preact; const {useState, useEffect, useRef, useMemo} = preactHooks; const html = htm.bind(h);
 
+    // utils
     const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
     const hashStr=(s)=>{let h=0;for(let i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))|0;return Math.abs(h)};
     const sanitize=(w)=>(w||"").toLowerCase().replace(/[^a-z]/g,"");
     const randColorDifferent=(from)=>{let n=from;while(n===from){const r=(Math.random()*256|0),g=(Math.random()*256|0),b=(Math.random()*256|0);n=`rgb(${r}, ${g}, ${b})`;}return n;};
     const assocFrom=(seed,pool)=>(!seed?pool[0]:pool[hashStr(seed)%pool.length]);
 
+    // constants
     const WORD_POOL_FALLBACK=["anchor","bridge","signal","spark","focus","vibe","clarity","fit","flow","foundation","balance","portal","neon","pixel","modem","canvas","grid","thread","map","north","home","open","quiet","bold","soft","steady","swift","adapt","guide","seed","bloom","river","stone","ember","pulse","weave","arc","pivot","center","root","branch","tide","scope","frame","echo","wave","field","light","shade","tone","idea","insight","sketch"];
     const PALETTES=[
       {name:"Random",colors:null},
@@ -54,14 +59,11 @@
       {name:"Warm",colors:["#7f1d1d","#b91c1c","#dc2626","#fb923c","#f59e0b","#fde047"]},
       {name:"Cool",colors:["#0ea5e9","#22d3ee","#06b6d4","#34d399","#60a5fa","#818cf8"]},
       {name:"Mono",colors:["#111","#1f1f1f","#2f2f2f","#3f3f3f","#4f4f4f","#6b7280","#9ca3af","#e5e7eb","#fff"]},
-      {name:"Earth",colors:["#3a5a40","#588157","#a3b18a","#936639","#7f5539","#b08968","#eaddcf"]},
+      {name:"Earth",colors:["#3a5a40","#588157","#a3b18a","#936639","#7f5539","#b08968","#eaddcf"]}
     ];
-    const makePicker=(pi)=>{const p=PALETTES[pi]?.colors;if(!p)return(from)=>randColorDifferent(from);return(from)=>{let n=p[(Math.random()*p.length|0)];if(n===from){for(let i=0;i<3&&n===from;i++)n=p[(Math.random()*p.length|0)];if(n===from)n=p[(p.indexOf(from)+1)%p.length];}return n;};};
-    const MIN=1,MAX=200,MIN_BRUSH=0,MAX_BRUSH=6;const CANVAS_THRESHOLD=8000;
-    const BG=["#000","#808080","#fff"];
-    const STORAGE_KEY="mosaic_state_v1";
-    const load=()=>{try{const r=localStorage.getItem(STORAGE_KEY);return r?JSON.parse(r):null;}catch{return null}};
-    const save=(o)=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}catch{}};
+    const makePicker=(pi)=>{const p=PALETTES[pi]?.colors;if(!p)return(from)=>randColorDifferent(from);return(from)=>{let n=p[(Math.random()*p.length|0)];if(n===from){for(let i=0;i<3&&n===from;i++)n=p[(Math.random()*p.length|0)];if(n===from)n=p[(p.indexOf(from)+1)%p.length];}return n;}};
+    const MIN=1,MAX=200,MIN_BRUSH=0,MAX_BRUSH=6; const BG=["#000","#808080","#fff"]; const STORAGE_KEY="mosaic_state_v1";
+    const load=()=>{try{const r=localStorage.getItem(STORAGE_KEY);return r?JSON.parse(r):null;}catch{return null}}; const save=(o)=>{try{localStorage.setItem(STORAGE_KEY,JSON.stringify(o));}catch{}};
 
     function useWindowSize(){const [s,set]=useState({width:innerWidth,height:innerHeight});useEffect(()=>{const on=()=>set({width:innerWidth,height:innerHeight});addEventListener('resize',on);return()=>removeEventListener('resize',on);},[]);return s;}
 
@@ -69,20 +71,23 @@
       const ref=useRef(null); const {width,height}=useWindowSize();
       const total=cols*rows; const tile=Math.max(1,Math.min((width/cols|0),(height/rows|0))); const W=tile*cols,H=tile*rows;
       const colors=useRef(initial&&initial.length===total?[...initial]:Array.from({length:total},()=>picker("rgb(0,0,0)")));
-      const anim=useRef(new Set());
-      const drawAll=()=>{const c=ref.current,ctx=c.getContext('2d');const dpr=Math.max(1,Math.floor(devicePixelRatio||1));c.width=Math.max(1,(W*dpr|0));c.height=Math.max(1,(H*dpr|0));ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);let k=0;for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){ctx.fillStyle=colors.current[k++];ctx.fillRect(x*tile,y*tile,tile+2,tile+2);} };
-      useEffect(()=>{drawAll();});
-      useEffect(()=>{const refh=()=>{colors.current=colors.current.map(c=>picker(c));drawAll();onColors?.(colors.current);};const rst=()=>{colors.current=Array.from({length:cols*rows},()=>picker("rgb(0,0,0)"));drawAll();onColors?.(colors.current);};addEventListener('mosaic-refresh',refh);addEventListener('mosaic-hard-reset',rst);return()=>{removeEventListener('mosaic-refresh',refh);removeEventListener('mosaic-hard-reset',rst);};},[cols,rows,picker]);
-      useEffect(()=>{const prev=colors.current;const next=Array.from({length:cols*rows},(_,i)=>picker(prev[i%prev.length]||"rgb(0,0,0)"));colors.current=next;drawAll();onColors?.(colors.current);},[cols,rows,picker]);
-      const flipAt=(i,x,y,oldC,newC)=>{const c=ref.current,ctx=c.getContext('2d');if(tile<=1){colors.current[i]=newC;ctx.fillStyle=newC;ctx.fillRect(x*tile,y*tile,tile+2,tile+2);onColors?.(colors.current);return;}if(anim.current.has(i))return;anim.current.add(i);const start=performance.now(),dur=220;const step=(now)=>{let t=(now-start)/dur;if(t>1)t=1;const ease=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;const ang=ease*Math.PI;const cA=Math.cos(ang);const face=cA>=0?oldC:newC;const sY=Math.abs(cA);ctx.fillStyle=bg;ctx.fillRect(x*tile,y*tile,tile+2,tile+2);ctx.save();ctx.translate(x*tile,y*tile+tile/2);ctx.transform(1,0,0,sY,0,0);ctx.translate(0,-tile/2);ctx.fillStyle=face;ctx.fillRect(0,0,tile,tile);const g=ctx.createLinearGradient(0,0,0,tile);const shade=.18*(1-sY);g.addColorStop(0,`rgba(0,0,0,${shade})`);g.addColorStop(.5,`rgba(0,0,0,0)`);g.addColorStop(1,`rgba(255,255,255,${shade*.8})`);ctx.fillStyle=g;ctx.fillRect(0,0,tile,tile);ctx.restore();if(t<1)requestAnimationFrame(step);else{colors.current[i]=newC;ctx.fillStyle=newC;ctx.fillRect(x*tile,y*tile,tile+2,tile+2);anim.current.delete(i);onColors?.(colors.current);}};requestAnimationFrame(step);};
-      const paint=(clientX,clientY)=>{const r=ref.current.getBoundingClientRect();const cx=((clientX-r.left)/r.width*cols|0);const cy=((clientY-r.top)/r.height*rows|0);if(cx<0||cy<0||cx>=cols||cy>=rows)return;const rad=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,brush));for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){if(dx*dx+dy*dy>rad*rad)continue;const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=cols||y>=rows)continue;const i=y*cols+x;const oc=colors.current[i],nc=picker(oc);flipAt(i,x,y,oc,nc);} };
-      const [drag,setDrag]=useState(false);
+      const onColorsPending=useRef(false); const requestOnColors=()=>{ if(!onColors)return; if(!onColorsPending.current){ onColorsPending.current=true; requestAnimationFrame(()=>{ onColorsPending.current=false; onColors?.(colors.current); }); } };
+      const drawTile=(ctx,x,y,color)=>{ ctx.fillStyle=color; ctx.fillRect(x*tile,y*tile,tile+2,tile+2); };
+      const drawAll=()=>{const c=ref.current,ctx=c.getContext('2d');const dpr=Math.max(1,Math.floor(devicePixelRatio||1));c.width=Math.max(1,(W*dpr|0));c.height=Math.max(1,(H*dpr|0));ctx.setTransform(dpr,0,0,dpr,0,0);ctx.imageSmoothingEnabled=false;ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);let k=0;for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){drawTile(ctx,x,y,colors.current[k++]);}};
+      useEffect(()=>{drawAll();},[W,H,bg]);
+      const active=useRef(new Set()); const flips=useRef([]); const raf=useRef(0);
+      const loop=()=>{raf.current=0;const c=ref.current,ctx=c.getContext('2d');const now=performance.now();let more=false;for(let k=flips.current.length-1;k>=0;k--){const f=flips.current[k];let t=(now-f.start)/220;if(t>1)t=1;const ease=t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;const ang=ease*Math.PI;const cA=Math.cos(ang);const sY=Math.abs(cA);const face=cA>=0?f.oldC:f.newC;ctx.fillStyle=bg;ctx.fillRect(f.x*tile,f.y*tile,tile+2,tile+2);ctx.save();ctx.translate(f.x*tile,f.y*tile+tile/2);ctx.transform(1,0,0,sY,0,0);ctx.translate(0,-tile/2);ctx.fillStyle=face;ctx.fillRect(0,0,tile,tile);const shade=.18*(1-sY);if(shade>0){ctx.globalAlpha=shade;ctx.fillStyle='#000';ctx.fillRect(0,0,tile,tile);ctx.globalAlpha=1;}ctx.restore();if(t>=1){colors.current[f.i]=f.newC;drawTile(ctx,f.x,f.y,f.newC);active.current.delete(f.i);flips.current.splice(k,1);requestOnColors();}else more=true;}if(more)raf.current=requestAnimationFrame(loop);};
+      const startFlip=(i,x,y,oldC,newC)=>{const c=ref.current,ctx=c.getContext('2d'); if(tile<=1){colors.current[i]=newC;drawTile(ctx,x,y,newC);requestOnColors();return;} if(active.current.has(i))return; active.current.add(i); flips.current.push({i,x,y,oldC,newC,start:performance.now()}); if(!raf.current)raf.current=requestAnimationFrame(loop); };
+      const paint=(clientX,clientY)=>{const r=ref.current.getBoundingClientRect();const cx=((clientX-r.left)/r.width*cols|0);const cy=((clientY-r.top)/r.height*rows|0);if(cx<0||cy<0||cx>=cols||cy>=rows)return;const rad=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,brush));for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){if(dx*dx+dy*dy>rad*rad)continue;const x=cx+dx,y=cy+dy;if(x<0||y<0||x>=cols||y>=rows)continue;const i=y*cols+x;const oc=colors.current[i],nc=picker(oc);startFlip(i,x,y,oc,nc);}};
+      const [drag,setDrag]=useState(false); const qx=useRef(0),qy=useRef(0),paintRaf=useRef(0); const schedulePaint=(x,y)=>{ qx.current=x; qy.current=y; if(!paintRaf.current)paintRaf.current=requestAnimationFrame(()=>{paintRaf.current=0;paint(qx.current,qy.current);});}; useEffect(()=>()=>{if(paintRaf.current)cancelAnimationFrame(paintRaf.current); if(raf.current)cancelAnimationFrame(raf.current);},[]);
+      useEffect(()=>{const prev=colors.current;const next=Array.from({length:cols*rows},(_,i)=>picker(prev[i%prev.length]||"rgb(0,0,0)"));colors.current=next;drawAll();requestOnColors();},[cols,rows,picker]);
+      useEffect(()=>{const refh=()=>{colors.current=colors.current.map(c=>picker(c));drawAll();requestOnColors();};const rst=()=>{colors.current=Array.from({length:cols*rows},()=>picker("rgb(0,0,0)"));drawAll();requestOnColors();};addEventListener('mosaic-refresh',refh);addEventListener('mosaic-hard-reset',rst);return()=>{removeEventListener('mosaic-refresh',refh);removeEventListener('mosaic-hard-reset',rst);};},[cols,rows,picker]);
       return html`<div style=${{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:bg}}>
         <canvas ref=${ref} width=${W} height=${H}
-          onPointerDown=${(e)=>{setDrag(true);paint(e.clientX,e.clientY);}}
-          onPointerMove=${(e)=>{if(drag)paint(e.clientX,e.clientY);}}
-          onPointerUp=${()=>setDrag(false)} onPointerLeave=${()=>setDrag(false)}
-          style=${{width:`${W}px`,height:`${H}px`,cursor:'crosshair',imageRendering:'pixelated'}} />
+          onPointerDown=${(e)=>{setDrag(true);schedulePaint(e.clientX,e.clientY);}}
+          onPointerMove=${(e)=>{if(drag)schedulePaint(e.clientX,e.clientY);}}
+          onPointerUp=${()=>setDrag(false)} onPointerLeave=${()=>setDrag(false)} onPointerCancel=${()=>setDrag(false)} onContextMenu=${(e)=>e.preventDefault()}
+          style=${{width:`${W}px`,height:`${H}px`,cursor:'crosshair',imageRendering:'pixelated',touchAction:'none',WebkitTouchCallout:'none'}} />
       </div>`;
     }
 
@@ -93,83 +98,125 @@
       const [palette,setPalette]=useState(init.current?.paletteIndex??0);
       const [brush,setBrush]=useState(init.current?.brush??1);
       const [bgIdx,setBgIdx]=useState(Math.max(0,Math.min(BG.length-1,init.current?.bgIndex??0)));
-      const [seed,setSeed]=useState(init.current?.seed??"trust");
-      const [assoc,setAssoc]=useState(init.current?.assoc??assocFrom(init.current?.seed??"trust",WORD_POOL_FALLBACK));
+      const [seed,setSeed]=useState(init.current?.seed??'trust');
+      const [assoc,setAssoc]=useState(init.current?.assoc??assocFrom(init.current?.seed??'trust',WORD_POOL_FALLBACK));
       const [mode,setMode]=useState(init.current?.assocMode??'sem');
       const picker=useMemo(()=>makePicker(palette),[palette]);
 
+      const win=useWindowSize();
+      const tileForApp=Math.max(1,Math.min((win.width/cols|0),(win.height/rows|0)));
+      const gridW=tileForApp*cols; const sideMargin=Math.max(0,(win.width-gridW)/2);
+      const menuRight=Math.max(18,sideMargin+18); const menuWidth=Math.min(340,Math.max(260,sideMargin-36));
+
       const [pool,setPool]=useState(null);
-      useEffect(()=>{let dead=false;fetch("https://raw.githubusercontent.com/first20hours/google-10000-english/master/20k.txt").then(r=>r.text()).then(t=>{if(dead)return;setPool(t.split(/\r?\n/).map(sanitize).filter(w=>w&&w.length>=3&&w.length<=12));}).catch(()=>{});return()=>{dead=true;};},[]);
+      useEffect(()=>{let dead=false;fetch('https://raw.githubusercontent.com/first20hours/google-10000-english/master/20k.txt').then(r=>r.text()).then(t=>{if(dead)return;setPool(t.split(/\r?\n/).map(sanitize).filter(w=>w&&w.length>=3&&w.length<=12));}).catch(()=>{});return()=>{dead=true;};},[]);
       const WORDS=pool??WORD_POOL_FALLBACK;
 
-      const [show,setShow]=useState(false);
-      const [phase,setPhase]=useState('closed');
-      const inputRef=useRef(null);
-      const trap=useRef(null);
+      const STOPWORDS=new Set('a an and the or but so to of in on for by with at from as is are be been was were am do does did doing have has had having not no yes if then than that this these those it its they them their you your i me my we our us he she him her his hers who whom which what when where why how there here over under very really just also too more most some any each few many much such own same other another thing things stuff comes come goes go went got get gets say says said talk talks talking spoke spoken speaking'.split(' '));
+      const stem=(w)=>w.replace(/(ing|edly|ed|ly|ness|ment|ments|ers|er|est|s)$/g,'');
+      const pick=(seedWord,items)=>{const s=sanitize(seedWord), st=stem(s), allow=new Set(WORDS); const rank=(it)=>{const w=sanitize(it.word||''); if(!w||w===s||STOPWORDS.has(w)||stem(w)===st||!allow.has(w)) return -1e9; const L=w.length; if(L<3||L>14) return -1e9; let r=0; for(const src of it.srcs||[]){ if(src==='syn') r+=1200; else if(src==='ml') r+=700; else if(src==='spc'||src==='gen') r+=600; else if(src==='com') r+=260; else if(src==='jjb') r+=200; else if(src==='trg') r+=50; } if(L>=4&&L<=10) r+=50; r+=((it.score||0)*0.4); return r;}; let best=null; for(const it of items){const sc=rank(it); if(sc>(best?.r??-1e12)) best={w:sanitize(it.word), r:sc};} return best&&best.r>-1e8?best.w:assocFrom(s,WORDS); };
+      const compute=async(seedWord)=>{const s=sanitize(seedWord); const base=`md=p,f&max=60`; const get=(u)=>fetch(u,{cache:'no-store'}).then(r=>r.json()); try{const [ml,syn,spc,gen,com,jjb,trg]=await Promise.all([
+        get(`https://api.datamuse.com/words?ml=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_spc=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_gen=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_com=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_jjb=${encodeURIComponent(s)}&${base}`),
+        get(`https://api.datamuse.com/words?rel_trg=${encodeURIComponent(s)}&${base}`)
+      ]); const map=new Map(); const add=(arr,src)=>{for(const d of arr||[]){const w=String(d.word||''); if(!w) continue; const v=map.get(w)||{word:w,score:0,tags:d.tags,srcs:[]}; v.score=Math.max(v.score||0,d.score||0); v.tags=d.tags||v.tags; if(!v.srcs.includes(src)) v.srcs.push(src); map.set(w,v);} }; add(ml,'ml'); add(syn,'syn'); add(spc,'spc'); add(gen,'gen'); add(com,'com'); add(jjb,'jjb'); add(trg,'trg'); setAssoc(pick(s,Array.from(map.values())));}catch{ setAssoc(assocFrom(s,WORDS)); } };
+      const setSeedAndAssoc=(s)=>{const c=sanitize(s); setSeed(c); if(mode==='sem') compute(c); else setAssoc(assocFrom(c,WORDS)); };
+
+      const [show,setShow]=useState(false); const [phase,setPhase]=useState('closed'); const inputRef=useRef(null); const trap=useRef(null);
       useEffect(()=>{if(show)requestAnimationFrame(()=>{inputRef.current?.focus();inputRef.current?.select();});},[show]);
       useEffect(()=>{trap.current?.focus({preventScroll:true});},[]);
 
-      const [toast,setToast]=useState(""); const tRef=useRef(); const bump=(m)=>{setToast(m);if(tRef.current)clearTimeout(tRef.current);tRef.current=window.setTimeout(()=>setToast(""),1200);};
+      const [toast,setToast]=useState(''); const tRef=useRef(); const bump=(m)=>{setToast(m); if(tRef.current)clearTimeout(tRef.current); tRef.current=window.setTimeout(()=>setToast(''),1200);};
+      const pRef=useRef(init.current||{}); const saveTimer=useRef(); const stage=()=>{ if(saveTimer.current)clearTimeout(saveTimer.current); saveTimer.current=window.setTimeout(()=>save({...pRef.current,cols,rows,seed,assoc,assocMode:mode,paletteIndex:palette,brush,bgIndex:bgIdx,v:12,ts:Date.now()}),240); }; useEffect(stage,[cols,rows,seed,assoc,mode,palette,brush,bgIdx]);
 
-      const pRef=useRef(init.current||{}); const saveTimer=useRef();
-      const stage=()=>{if(saveTimer.current)clearTimeout(saveTimer.current);saveTimer.current=window.setTimeout(()=>save({...pRef.current,cols,rows,seed,assoc,assocMode:mode,paletteIndex:palette,brush,bgIndex:bgIdx,v:1,ts:Date.now()}),240);};
-      useEffect(stage,[cols,rows,seed,assoc,mode,palette,brush,bgIdx]);
+      const [cover,setCover]=useState({on:false,color:'rgb(0,0,0)',word:''}); const showCover=()=>setCover({on:true,color:randColorDifferent(cover.color),word:assoc}); const hideCover=()=>setCover(c=>({...c,on:false}));
 
-      const [cover,setCover]=useState({on:false,color:"rgb(0,0,0)",word:""});
-      const showCover=()=>setCover({on:true,color:randColorDifferent(cover.color),word:assoc});
-      const hideCover=()=>setCover(c=>({...c,on:false}));
+      const [showMenu,setShowMenu]=useState(false); const [phaseMenu,setPhaseMenu]=useState('closed'); function openMenu(){ if(showMenu&&phaseMenu==='open') return; setShowMenu(true); setPhaseMenu('opening'); } function closeMenu(){ if(!showMenu) return; setPhaseMenu('closing'); }
 
-      const compute=async(seedWord)=>{const s=sanitize(seedWord);const base=`md=p,f&max=60`;const get=(u)=>fetch(u,{cache:'no-store'}).then(r=>r.json());try{const [ml,syn]=await Promise.all([get(`https://api.datamuse.com/words?ml=${encodeURIComponent(s)}&${base}`),get(`https://api.datamuse.com/words?rel_syn=${encodeURIComponent(s)}&${base}`)]);const list=[...(ml||[]),...(syn||[])].map(d=>d.word).filter(Boolean).map(sanitize);const allow=new Set(WORDS);let best="",score=-1;for(const w of list){if(!allow.has(w)||w===s||w.length<3||w.length>12)continue;const sc=(w===s?0:1)+(w.length>=4&&w.length<=10?1:0);if(sc>score){score=sc;best=w;}}setAssoc(best||assocFrom(s,WORDS));}catch{setAssoc(assocFrom(s,WORDS));}};
-      const setSeedAndAssoc=(s)=>{const c=sanitize(s);setSeed(c);if(mode==='sem')compute(c);else setAssoc(assocFrom(c,WORDS));};
-
-      const refreshEvt=new Event("mosaic-refresh"), resetEvt=new Event("mosaic-hard-reset");
-      const refresh=()=>window.dispatchEvent(refreshEvt);
+      const refreshEvt=new Event('mosaic-refresh'), resetEvt=new Event('mosaic-hard-reset'); const refresh=()=>window.dispatchEvent(refreshEvt);
 
       function openPrompt(){ if(show&&phase==='open'){ inputRef.current?.focus(); inputRef.current?.select(); return;} setShow(true); setPhase('opening'); }
       function closePrompt(){ if(!show) return; setPhase('closing'); }
 
-      const exportPNG=()=>{const colors=pRef.current?.colors; if(!colors || colors.length!==cols*rows){ bump('Export not ready'); return; } const tile=12, w=cols*tile, h=rows*tile; const c=document.createElement('canvas'); c.width=w; c.height=h; const ctx=c.getContext('2d'); ctx.fillStyle=BG[bgIdx]; ctx.fillRect(0,0,w,h); let i=0; for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){ ctx.fillStyle=colors[i++]; ctx.fillRect(x*tile,y*tile,tile+2,tile+2); } const a=document.createElement('a'); a.href=c.toDataURL('image/png'); a.download=`mosaic-${cols}x${rows}.png`; document.body.appendChild(a); a.click(); a.remove(); bump('Exported PNG'); };
-      const hardReset=()=>{ try{localStorage.removeItem(STORAGE_KEY);}catch{} setCols(20); setRows(20); setSeed('trust'); setAssoc(assocFrom('trust',WORDS)); setMode('sem'); setPalette(0); setBrush(1); setBgIdx(0); pRef.current={}; window.dispatchEvent(resetEvt); bump('Reset'); };
+      function exportPNG(){ const colors=pRef.current?.colors; if(!colors||colors.length!==cols*rows){ bump('Export not ready'); return; } const tile=12,w=cols*tile,h=rows*tile; const c=document.createElement('canvas'); c.width=w;c.height=h; const ctx=c.getContext('2d'); ctx.fillStyle=BG[bgIdx]; ctx.fillRect(0,0,w,h); let i=0; for(let y=0;y<rows;y++)for(let x=0;x<cols;x++){ ctx.fillStyle=colors[i++]; ctx.fillRect(x*tile,y*tile,tile+2,tile+2);} const a=document.createElement('a'); a.href=c.toDataURL('image/png'); a.download=`mosaic-${cols}x${rows}.png`; document.body.appendChild(a); a.click(); a.remove(); bump('Exported PNG'); }
+      function hardReset(){ try{localStorage.removeItem(STORAGE_KEY);}catch{} setCols(20); setRows(20); setSeed('trust'); setAssoc(assocFrom('trust',WORDS)); setMode('sem'); setPalette(0); setBrush(1); setBgIdx(0); pRef.current={}; window.dispatchEvent(resetEvt); bump('Reset'); }
 
-      const onKeyDown=(e)=>{const t=e.target; const typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable); if(typing){ if(e.key==='Escape'){ e.preventDefault(); closePrompt(); } e.stopPropagation?.(); return; } const step=e.shiftKey?5:1; if(e.code==='Space'){ e.preventDefault(); if(!cover.on) showCover(); return; } if(e.key==='+'||e.key==='='){ e.preventDefault(); setCols(n=>Math.max(MIN,Math.min(MAX,n+step))); setRows(n=>Math.max(MIN,Math.min(MAX,n+step))); } else if(e.key==='-'||e.key==='_'){ e.preventDefault(); setCols(n=>Math.max(MIN,Math.min(MAX,n-step))); setRows(n=>Math.max(MIN,Math.min(MAX,n-step))); } else if(e.key==='Enter'){ e.preventDefault(); refresh(); } else if(e.key==='0'){ e.preventDefault(); setCols(MIN); setRows(MIN); } else if(e.key==='9'){ e.preventDefault(); const t2=Math.min(MAX,(Math.sqrt(CANVAS_THRESHOLD)|0)+20); setCols(t2); setRows(t2); } else if(e.key==='/'||e.key==='?'){ e.preventDefault(); openPrompt(); } else if(e.key.toLowerCase()==='s'){ e.preventDefault(); setMode(m=>{ const nm=m==='sem'?'det':'sem'; bump(`Assoc: ${nm==='sem'?'Semantic':'Deterministic'}`); if(nm==='sem') compute(seed); else setAssoc(assocFrom(seed,WORDS)); return nm; }); } else if(e.key.toLowerCase()==='b'){ e.preventDefault(); setBgIdx(i=>{ const ni=(i+1)%BG.length; bump('Background'); return ni; }); } else if(e.key.toLowerCase()==='e'){ e.preventDefault(); exportPNG(); } else if(e.key.toLowerCase()==='r'){ e.preventDefault(); hardReset(); } else if(e.key.toLowerCase()==='p'){ e.preventDefault(); setPalette(i=>{ const ni=(i+1)%PALETTES.length; bump(`Palette: ${PALETTES[ni].name}`); return ni; }); } else if(e.key==='['){ e.preventDefault(); setBrush(b=>{ const nb=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,b-1)); bump(`Brush: ${nb}`); return nb; }); } else if(e.key===']'){ e.preventDefault(); setBrush(b=>{ const nb=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,b+1)); bump(`Brush: ${nb}`); return nb; }); } else if(e.key==='Escape'){ e.preventDefault(); if(cover.on) hideCover(); if(show) closePrompt(); }};
+      const onKeyDown=(e)=>{ const t=e.target; const typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable); if(typing){ if(e.key==='Escape'){ e.preventDefault(); closePrompt(); } e.stopPropagation?.(); return; } const step=e.shiftKey?5:1; if(e.code==='Space'){ e.preventDefault(); if(!cover.on) showCover(); return; } if(e.key==='+'||e.key==='='){ e.preventDefault(); setCols(n=>clamp(n+step,MIN,MAX)); setRows(n=>clamp(n+step,MIN,MAX)); } else if(e.key==='-'||e.key==='_'){ e.preventDefault(); setCols(n=>clamp(n-step,MIN,MAX)); setRows(n=>clamp(n-step,MIN,MAX)); } else if(e.key==='Enter'){ e.preventDefault(); refresh(); } else if(e.key==='0'){ e.preventDefault(); setCols(MIN); setRows(MIN); } else if(e.key==='9'){ e.preventDefault(); const t2=Math.min(MAX,60); setCols(t2); setRows(t2); } else if(e.key==='/'||e.key==='?'){ e.preventDefault(); openPrompt(); } else if(e.key.toLowerCase()==='s'){ e.preventDefault(); setMode(m=>{ const nm=m==='sem'?'det':'sem'; bump(`Assoc: ${nm==='sem'?'Semantic':'Deterministic'}`); if(nm==='sem') compute(seed); else setAssoc(assocFrom(seed,WORDS)); return nm; }); } else if(e.key.toLowerCase()==='b'){ e.preventDefault(); setBgIdx(i=>{ const ni=(i+1)%BG.length; bump('Background'); return ni; }); } else if(e.key.toLowerCase()==='e'){ e.preventDefault(); exportPNG(); } else if(e.key.toLowerCase()==='r'){ e.preventDefault(); hardReset(); } else if(e.key.toLowerCase()==='p'){ e.preventDefault(); setPalette(i=>{ const ni=(i+1)%PALETTES.length; bump(`Palette: ${PALETTES[ni].name}`); return ni; }); } else if(e.key==='['){ e.preventDefault(); setBrush(b=>{ const nb=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,b-1)); bump(`Brush: ${nb}`); return nb; }); } else if(e.key===']'){ e.preventDefault(); setBrush(b=>{ const nb=Math.max(MIN_BRUSH,Math.min(MAX_BRUSH,b+1)); bump(`Brush: ${nb}`); return nb; }); } else if(e.key==='Escape'){ e.preventDefault(); if(cover.on) hideCover(); if(show) closePrompt(); }};
       const onKeyUp=(e)=>{ const t=e.target; const typing=t&&(t.tagName==='INPUT'||t.tagName==='TEXTAREA'||t.isContentEditable); if(typing) return; if(e.code==='Space'){ e.preventDefault(); if(cover.on) hideCover(); } };
 
       const ptrs=useRef(new Map()); const lastTap=useRef(0); const longRef=useRef(); const pinchRef=useRef(null); const moveSum=useRef(0);
       const pointerDown=(e)=>{ document.getElementById('trap')?.focus({preventScroll:true}); ptrs.current.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(e.pointerType==='touch'){ const now=performance.now(); if(now-lastTap.current<280) refresh(); lastTap.current=now; clearTimeout(longRef.current); moveSum.current=0; longRef.current=window.setTimeout(()=>showCover(),450); } if(ptrs.current.size===2){ const a=[...ptrs.current.values()]; pinchRef.current=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); } };
-      const pointerMove=(e)=>{ const m=ptrs.current; if(!m.has(e.pointerId)) return; const p=m.get(e.pointerId); const dx=e.clientX-p.x, dy=e.clientY-p.y; moveSum.current+=Math.abs(dx)+Math.abs(dy); m.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(moveSum.current>12) clearTimeout(longRef.current); if(m.size===2){ const a=[...m.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pinchRef.current){ const r=d/pinchRef.current; if(r>1.06){ setCols(n=>Math.max(MIN,Math.min(MAX,n+1))); setRows(n=>Math.max(MIN,Math.min(MAX,n+1))); pinchRef.current=d; } else if(r<0.94){ setCols(n=>Math.max(MIN,Math.min(MAX,n-1))); setRows(n=>Math.max(MIN,Math.min(MAX,n-1))); pinchRef.current=d; } } else { pinchRef.current=d; } } };
-      const pointerUp=(e)=>{ ptrs.current.delete(e.pointerId); clearTimeout(longRef.current); moveSum.current=0; if(ptrs.current.size<2) pinchRef.current=null; if(cover.on && ptrs.current.size===0) hideCover(); };
+      const pointerMove=(e)=>{ const m=ptrs.current; if(!m.has(e.pointerId)) return; const p=m.get(e.pointerId); const dx=e.clientX-p.x, dy=e.clientY-p.y; moveSum.current+=Math.abs(dx)+Math.abs(dy); m.set(e.pointerId,{x:e.clientX,y:e.clientY}); if(moveSum.current>12) clearTimeout(longRef.current); if(m.size===2){ const a=[...m.values()]; const d=Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y); if(pinchRef.current){ const r=d/pinchRef.current; if(r>1.06){ setCols(n=>clamp(n+1,MIN,MAX)); setRows(n=>clamp(n+1,MIN,MAX)); pinchRef.current=d; } else if(r<0.94){ setCols(n=>clamp(n-1,MIN,MAX)); setRows(n=>clamp(n-1,MIN,MAX)); pinchRef.current=d; } } else { pinchRef.current=d; } } };
+      const pointerUp=(e)=>{ ptrs.current.delete(e.pointerId); clearTimeout(longRef); moveSum.current=0; if(ptrs.current.size<2) pinchRef.current=null; if(cover.on && ptrs.current.size===0) hideCover(); };
 
       useEffect(()=>{ try{ const neon=makePicker(1); console.assert(PALETTES[1].colors.includes(neon('#ff006e')),'picker ok'); }catch(e){ console.error('self-test',e); } },[]);
 
       return html`<div id="trap" tabIndex=${0}
         onKeyDown=${onKeyDown} onKeyUp=${onKeyUp}
         onPointerDown=${pointerDown} onPointerMove=${pointerMove} onPointerUp=${pointerUp}
-        style=${{width:'100vw',height:'100vh',userSelect:'none',outline:'none',position:'relative',background:BG[bgIdx]}}>
+        style=${{width:'100vw',height:'100svh',userSelect:'none',outline:'none',position:'relative',background:BG[bgIdx],touchAction:'none',WebkitTapHighlightColor:'transparent'}}>
         <svg width="0" height="0" style=${{position:'absolute'}} aria-hidden>
           <filter id="crtNoise"><feTurbulence type="turbulence" baseFrequency="1.2" numOctaves="1" seed="2"><animate attributeName="seed" from="0" to="50" dur="1s" repeatCount="indefinite"/></feTurbulence><feColorMatrix type="saturate" values="0"/></filter>
         </svg>
-        ${html`<${CanvasGrid} cols=${cols} rows=${rows} brush=${brush} bg=${BG[bgIdx]} initial=${null} onColors=${(c)=>{ pRef.current={...pRef.current, colors:c}; }} picker=${picker} />`}
+        ${html`<${CanvasGrid} cols=${cols} rows=${rows} brush=${brush} bg=${BG[bgIdx]} initial=${init.current?.colors} onColors=${(c)=>{ pRef.current={...pRef.current, colors:c}; }} picker=${picker} />`}
         ${cover.on && html`<div style=${{position:'absolute',inset:0,display:'flex',alignItems:'center',justifyContent:'center',background:cover.color}}>
           <span style=${{fontFamily:"VT323,monospace",fontSize:"min(14vw,14vh)",color:"#fff",letterSpacing:".06em",textShadow:"0 2px 0 rgba(0,0,0,.6)"}}>${cover.word}</span>
         </div>`}
-        ${show && html`
-          <form
-            onAnimationEnd=${()=>{ if(phase==='opening') setPhase('open'); else if(phase==='closing'){ setShow(false); setPhase('closed'); requestAnimationFrame(()=>document.getElementById('trap')?.focus()); } }}
-            onKeyDownCapture=${(e)=>{ if(e.key!=='Escape') e.stopPropagation(); }}
-            onKeyDown=${(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closePrompt(); } }}
-            onSubmit=${(e)=>{ e.preventDefault(); const v=String(new FormData(e.currentTarget).get('seed')||"").trim(); if(v) setSeedAndAssoc(v); closePrompt(); }}
-            class="gb tv ${phase==='opening'?'open anim':''} ${phase==='closing'?'close anim':''} ${phase==='open'?'ready':''}"
-            style=${{pointerEvents: phase==='closing'?'none':'auto'}}>
-            <div class="snow"><div class="layer noise"></div><div class="layer scan"></div><div class="layer vig"></div></div>
-            <div class="inner" style=${{display:'flex',alignItems:'center'}}>
-              <span style=${{marginRight:8}}>Seed:</span>
-              <input name="seed" ref=${inputRef} autoFocus defaultValue=${seed}
-                     onKeyDown=${(e)=>{ e.stopPropagation(); const k=e.key; if(k==='Enter'){ e.preventDefault(); e.currentTarget.form?.requestSubmit(); } else if(k==='/'||k==='?'){ e.preventDefault(); e.currentTarget.select(); } }}
-                     class="in" placeholder="type a word…" />
-              <button class="btn" type="submit">SET</button>
+        ${html`<button aria-label="Menu" onClick=${()=>showMenu? closeMenu():openMenu()} style=${{ position:'absolute', right:'calc(12px + env(safe-area-inset-right))', top:'calc(12px + env(safe-area-inset-top))', fontFamily:'VT323,monospace', fontSize:22, background:'#fff', border:'2px solid #000', padding:'2px 10px', cursor:'pointer', boxShadow:'0 0 0 3px #000,0 0 0 6px #fff,0 0 0 9px #000' }}>?</button>`}
+        ${showMenu && html`<div class=${`gb tv ${phaseMenu==='opening'?'open anim':''} ${phaseMenu==='closing'?'close anim':''} ${phaseMenu==='open'?'ready':''}`}
+             onAnimationEnd=${()=>{ if(phaseMenu==='opening') setPhaseMenu('open'); else if(phaseMenu==='closing'){ setShowMenu(false); setPhaseMenu('closed'); } }}
+             style=${{ position:'absolute', left:'auto', transform:'none', bottom:'auto', right:`calc(${menuRight}px + env(safe-area-inset-right))`, top:'calc(18px + env(safe-area-inset-top))', maxWidth:'80vw', width:(isFinite(menuWidth)?menuWidth:320), pointerEvents: phaseMenu==='closing'?'none':'auto' }}>
+          <div class="snow"><div class="layer noise"></div><div class="layer scan"></div><div class="layer vig"></div></div>
+          <div class="inner" style=${{ maxHeight:'100%', overflowY:'auto', overflowX:'hidden', wordBreak:'break-word' }}>
+            <div style=${{ fontSize:22, lineHeight:1.25 }}>
+              <div style=${{ fontWeight:700, marginBottom:8 }}>Legend</div>
+              <div style=${{ display:'grid', gridTemplateColumns:'max-content 1fr', gap:'4px 10px' }}>
+                <div>Drag</div><div>paint tiles</div>
+                <div>[ / ]</div><div>brush size</div>
+                <div>+ / -</div><div>density (Shift = big)</div>
+                <div>/</div><div>open seed prompt</div>
+                <div>Enter</div><div>shuffle colors</div>
+                <div>Space (hold)</div><div>reveal word overlay</div>
+                <div>P</div><div>switch palette</div>
+                <div>B</div><div>background (black/gray/white)</div>
+                <div>S</div><div>assoc mode (Semantic/Deterministic)</div>
+                <div>E</div><div>export PNG</div>
+                <div>R</div><div>reset</div>
+                <div>0 / 9</div><div>snap densities</div>
+                <div style=${{ gridColumn:'1 / span 2', marginTop:8, opacity:.85 }}>Mobile: Tap & drag = paint • <b>Double-tap</b> = shuffle • <b>Long-press</b> = word • <b>Pinch</b> = density</div>
+                <div style=${{ gridColumn:'1 / span 2', margin:'8px 0' }}>
+                  <button class="btn" onclick=${()=> setPalette(i => (i+1)%PALETTES.length)}>Palette</button>
+                  <button class="btn" onclick=${()=> setBgIdx(i => (i+1)%BG.length)}>Background</button>
+                  <button class="btn" onclick=${exportPNG}>Export</button>
+                  <button class="btn" onclick=${hardReset}>Reset</button>
+                </div>
+                <div style=${{ gridColumn:'1 / span 2', marginTop:8, opacity:.7 }}>[M] toggles this menu</div>
+              </div>
             </div>
-          </form>
-        `}
+          </div>
+        </div>`}
+
+        ${show && html`<form
+          onAnimationEnd=${()=>{ if(phase==='opening') setPhase('open'); else if(phase==='closing'){ setShow(false); setPhase('closed'); requestAnimationFrame(()=>document.getElementById('trap')?.focus()); } }}
+          onKeyDownCapture=${(e)=>{ if(e.key!=='Escape') e.stopPropagation(); }}
+          onKeyDown=${(e)=>{ if(e.key==='Escape'){ e.preventDefault(); e.stopPropagation(); closePrompt(); } }}
+          onSubmit=${(e)=>{ e.preventDefault(); const v=String(new FormData(e.currentTarget).get('seed')||'').trim(); if(v) setSeedAndAssoc(v); closePrompt(); }}
+          class=${`gb tv ${phase==='opening'?'open anim':''} ${phase==='closing'?'close anim':''} ${phase==='open'?'ready':''}`}
+          style=${{ pointerEvents: phase==='closing'?'none':'auto' }}>
+          <div class="snow"><div class="layer noise"></div><div class="layer scan"></div><div class="layer vig"></div></div>
+          <div class="inner" style=${{ display:'flex', alignItems:'center' }}>
+            <span style=${{ marginRight:8 }}>Seed:</span>
+            <input name="seed" ref=${(el)=>inputRef.current=el} autoFocus defaultValue=${seed}
+              onKeyDown=${(e)=>{ e.stopPropagation(); const k=e.key; if(k==='Enter'){ e.preventDefault(); e.currentTarget.form?.requestSubmit(); } else if(k==='/'||k==='?'){ e.preventDefault(); e.currentTarget.select(); } }}
+              class="in" placeholder="type a word…" />
+            <button class="btn" type="submit">SET</button>
+          </div>
+        </form>`}
+
         ${toast && html`<div class="toast">${toast}</div>`}
       </div>`;
     }
